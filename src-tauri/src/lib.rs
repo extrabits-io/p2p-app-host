@@ -1,7 +1,6 @@
-use std::{sync::Mutex, time::Duration};
+use std::sync::Mutex;
 
 use tauri::{async_runtime, path::BaseDirectory, Manager};
-use tokio::time::sleep;
 
 use crate::{
     relay::{RelayConfig, RelayConnection},
