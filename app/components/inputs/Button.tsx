@@ -1,0 +1,27 @@
+import type { JSX } from "react";
+
+type ButtonProps = {
+  title: string;
+  type?: HTMLButtonElement["type"];
+  icon?: JSX.Element;
+  onClick?: () => Promise<void> | void;
+};
+
+export default function Button({ title, type, icon, onClick }: ButtonProps) {
+  return (
+    <button
+      type={type}
+      className="group relative inline-flex items-center overflow-hidden rounded-sm bg-indigo-600 px-8 py-3 text-white"
+      onClick={onClick}
+    >
+      {icon && (
+        <span className="absolute -start-full transition-all group-hover:start-4">
+          {icon}
+        </span>
+      )}
+      <span className="text-sm font-medium transition-all group-hover:ms-4">
+        {title}
+      </span>
+    </button>
+  );
+}

@@ -15,7 +15,8 @@
       {
         "title": "p2p-app-host",
         "width": 1200,
-        "height": 800
+        "height": 800,
+        "theme": "Dark"
       }
     ],
     "security": {
