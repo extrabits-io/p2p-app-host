@@ -1,2 +1,5 @@
-[target.x86_64-unknown-linux-gnu]
-runner = "./dev.sh"
+[target.'cfg(target_os = "linux")']
+runner = "./linux/dev.sh"
+
+[target.'cfg(target_os = "macos")']
+runner = "./macos/dev.sh"

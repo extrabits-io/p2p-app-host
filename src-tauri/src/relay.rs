@@ -4,7 +4,7 @@ use defguard_wireguard_rs::{host::Peer, key::Key, net::IpAddrMask, InterfaceConf
 use defguard_wireguard_rs::{WGApi, WireguardInterfaceApi};
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct RelayConfig {
     pub relay_public_key: String,
     pub relay_endpoint: String,
@@ -13,11 +13,20 @@ pub struct RelayConfig {
     pub ip_address: String,
 }
 
-pub fn connect(config: &RelayConfig) -> anyhow::Result<()> {
+pub struct RelayConnection {
+    #[cfg(not(target_os = "macos"))]
+    #[allow(unused)]
+    wgapi: WGApi<defguard_wireguard_rs::Kernel>,
+    #[cfg(target_os = "macos")]
+    #[allow(unused)]
+    wgapi: WGApi<defguard_wireguard_rs::Userspace>,
+}
+
+pub fn connect(config: &RelayConfig) -> anyhow::Result<RelayConnection> {
     let ifname: String = if cfg!(target_os = "linux") || cfg!(target_os = "freebsd") {
         "wg0".into()
     } else {
-        "utun3".into()
+        "utun6".into() // TODO - test for available interface name
     };
 
     #[cfg(not(target_os = "macos"))]
@@ -30,17 +39,16 @@ pub fn connect(config: &RelayConfig) -> anyhow::Result<()> {
     let peer_key = Key::from_str(&config.relay_public_key)?;
     let mut peer = Peer::new(peer_key.clone());
 
-    let endpoint: SocketAddr = config.relay_endpoint.parse().unwrap();
+    let endpoint: SocketAddr = config.relay_endpoint.parse()?;
     peer.endpoint = Some(endpoint);
     peer.persistent_keepalive_interval = Some(25);
     peer.allowed_ips
         .push(IpAddrMask::from_str(&config.address_range)?);
 
-    // interface configuration
     let interface_config = InterfaceConfiguration {
         name: ifname,
         prvkey: config.private_key.clone(),
-        addresses: vec![config.ip_address.parse().unwrap()],
+        addresses: vec![config.ip_address.parse()?],
         port: 0,
         peers: vec![peer],
         mtu: None,
@@ -50,7 +58,8 @@ pub fn connect(config: &RelayConfig) -> anyhow::Result<()> {
     wgapi.configure_interface(&interface_config)?;
     #[cfg(windows)]
     wgapi.configure_interface(&interface_config, &[], &[])?;
+
     wgapi.configure_peer_routing(&interface_config.peers)?;
 
-    Ok(())
+    Ok(RelayConnection { wgapi })
 }
