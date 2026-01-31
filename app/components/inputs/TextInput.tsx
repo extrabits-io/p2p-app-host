@@ -1,13 +1,5 @@
-import type { ChangeEventHandler } from "react";
 import { capitalize } from "../../helpers/string-utils";
-
-type BaseInputProps = {
-  id?: string;
-  name: string;
-  value?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
-  className?: string;
-};
+import type { BaseInputProps } from "./types";
 
 type TextInputProps = BaseInputProps & { type?: string; placeholder?: string };
 

@@ -4,6 +4,7 @@ import { SecretStorage } from "~/secret-storage";
 import type { Route } from "./+types/relay";
 import { useFetcher } from "react-router";
 import { useToast } from "~/components/Toast";
+import Toggle from "~/components/inputs/Toggle";
 
 type RelayConfig = {
   relayPublicKey: string;
@@ -70,7 +71,13 @@ export default function RelaySettings({ loaderData }: Route.ComponentProps) {
         placeholder="IP Address"
         value={config?.ipAddress}
       />
-      <Button type="submit" title="Save" />
+      <div className="flex justify-between">
+        <Button type="submit" title="Save" />
+        <div className="flex items-center">
+          <label>Connect</label>
+          <Toggle name="isConnected" className="ml-4" />
+        </div>
+      </div>
     </fetcher.Form>
   );
 }
