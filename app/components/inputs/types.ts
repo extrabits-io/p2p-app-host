@@ -6,4 +6,5 @@ export type BaseInputProps = {
   value?: string;
   onChange?: ChangeEventHandler<HTMLInputElement>;
   className?: string;
+  disabled?: boolean;
 };

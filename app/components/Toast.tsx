@@ -63,7 +63,7 @@ const types = {
   },
 };
 
-export const useToast = create<ToastProps>((set) => ({
+export const useToast = create<ToastProps>(set => ({
   message: null,
   type: "info",
   show: (message, type = "info", timeout = 3000) => {

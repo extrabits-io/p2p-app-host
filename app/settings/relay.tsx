@@ -5,6 +5,7 @@ import type { Route } from "./+types/relay";
 import { useFetcher } from "react-router";
 import { useToast } from "~/components/Toast";
 import Toggle from "~/components/inputs/Toggle";
+import { create } from "zustand";
 
 type RelayConfig = {
   relayPublicKey: string;
@@ -14,24 +15,57 @@ type RelayConfig = {
   ipAddress: string;
 };
 
+type RelayStore = {
+  storage: SecretStorage | null;
+  config: RelayConfig | null;
+  isConnected: boolean;
+  load: (password: string) => Promise<RelayConfig>;
+  save: (formData: FormData) => Promise<boolean>;
+}
+
+const useRelay = create<RelayStore>((set, get) => ({
+  storage: null,
+  config: null,
+  isConnected: false,
+
+  load: async (password) => {
+    const storage = await SecretStorage.getOrInit(password);
+    const config = (await storage.get<RelayConfig>(STORAGE_KEY)) as RelayConfig;
+    set({ storage, config });
+    return config;
+  },
+
+  save: async (formData) => {
+    const { storage } = get();
+    if (formData && storage) {
+      const cfg = Object.fromEntries(formData.entries());
+      await storage.insert(STORAGE_KEY, cfg);
+      await storage.save();
+      return true;
+    }
+    return false;
+  },
+}));
+
 const STORAGE_KEY = "relay-config";
 const password = "test";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
-  const storage = await SecretStorage.getOrInit(password);
-  const config = (await storage.get<RelayConfig>(STORAGE_KEY)) as RelayConfig;
-  return { storage, config };
+  const config = await useRelay.getState().load(password);
+  return { config };
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
   const formData = await request.formData();
-  const storage = await SecretStorage.getOrInit(password);
-  if (formData && storage) {
-    const cfg = Object.fromEntries(formData.entries()) as RelayConfig;
-    await storage.insert(STORAGE_KEY, cfg);
-    await storage.save();
-    useToast.getState().show("Saved", "success");
-    return true;
+  if (formData) {
+    const success = await useRelay.getState().save(formData);
+    const showToast = useToast().show;
+    if (success) {
+      showToast("Saved", "success");
+    } else {
+      showToast("Failed to save settings", "error");
+    }
+    return success;
   }
 }
 
@@ -75,7 +109,7 @@ export default function RelaySettings({ loaderData }: Route.ComponentProps) {
         <Button type="submit" title="Save" />
         <div className="flex items-center">
           <label>Connect</label>
-          <Toggle name="isConnected" className="ml-4" />
+          <Toggle name="isConnected" className="ml-4" disabled={config == null} />
         </div>
       </div>
     </fetcher.Form>

@@ -4,7 +4,7 @@ import type { BaseInputProps } from "./types";
 type TextInputProps = BaseInputProps & { type?: string; placeholder?: string };
 
 function TextInput(props: TextInputProps) {
-  const { id, name, value, onChange, type, placeholder, className } = props;
+  const { id, name, value, onChange, type, placeholder, className, disabled } = props;
   return (
     <div className={className}>
       <label
@@ -19,6 +19,7 @@ function TextInput(props: TextInputProps) {
           className="w-full peer border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 p-2"
           placeholder={placeholder}
           defaultValue={value}
+          disabled={disabled}
           onChange={onChange}
         />
         <span className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white dark:bg-black p-0.5 text-xs text-gray-700 dark:text-gray-400 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">
