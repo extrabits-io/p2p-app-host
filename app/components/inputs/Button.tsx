@@ -19,7 +19,11 @@ export default function Button({ title, type, icon, onClick }: ButtonProps) {
           {icon}
         </span>
       )}
-      <span className="text-sm font-medium transition-all group-hover:ms-4">
+      <span
+        className={
+          "text-sm font-medium group-hover:ms-4" + icon ? " transition-all" : ""
+        }
+      >
         {title}
       </span>
     </button>

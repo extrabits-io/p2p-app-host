@@ -1,18 +1,13 @@
-use std::sync::Mutex;
+use tauri::Manager;
 
-use tauri::{async_runtime, path::BaseDirectory, Manager};
-
-use crate::{
-    relay::{RelayConfig, RelayConnection},
-    server::static_files::SpaConfig,
-};
+use crate::relay::RelayConnection;
 
 pub mod relay;
 pub mod server;
 
+#[allow(unused)]
 struct AppState {
     // need to hold onto a reference to prevent the interface from being destroyed
-    #[allow(unused)]
     relay_connection: RelayConnection,
 }
 

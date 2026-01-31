@@ -3,6 +3,7 @@ import TextInput from "~/components/inputs/TextInput";
 import { SecretStorage } from "~/secret-storage";
 import type { Route } from "./+types/relay";
 import { useFetcher } from "react-router";
+import { useToast } from "~/components/Toast";
 
 type RelayConfig = {
   relayPublicKey: string;
@@ -28,6 +29,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     const cfg = Object.fromEntries(formData.entries()) as RelayConfig;
     await storage.insert(STORAGE_KEY, cfg);
     await storage.save();
+    useToast.getState().show("Saved", "success");
     return true;
   }
 }
